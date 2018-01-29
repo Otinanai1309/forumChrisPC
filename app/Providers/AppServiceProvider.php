@@ -2,10 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 use App\Channel;
-
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,18 +14,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // **************mhnyma lathous sth Database************
-        Schema::defaultStringLength(191);
-        \View::composer('*', function($view) {
-          $view->with('channels', Channel::all());
+        \View::composer('*', function ($view) {
+            $channels = \Cache::rememberForever('channels', function () {
+                return Channel::all();
+            });
+
+            $view->with('channels', $channels);
         });
-    //     \View::composer('*', function ($view) {
-    //         $channels = \Cache::rememberForever('channels', function(){
-    //           return Channel::all();
-    //         });
-       //
-    //         $view->with('channels', $channels);
-    //    });
 
         \Validator::extend('spamfree', 'App\Rules\SpamFree@passes');
     }
@@ -39,8 +32,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->isLocal()){
-          $this->app->register(\Barryvdh\Debugbar\ServiceProvider::class);
+        if ($this->app->isLocal()) {
+            $this->app->register(\Barryvdh\Debugbar\ServiceProvider::class);
         }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Inspections\Spam;
 use App\Reply;
 use App\Thread;
+use Illuminate\Support\Facades\Gate;
 
 class RepliesController extends Controller
 {
@@ -32,39 +32,34 @@ class RepliesController extends Controller
      *
      * @param  integer $channelId
      * @param  Thread  $thread
-     * @param Spam     $spam
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Http\RedirectResponse
      */
     public function store($channelId, Thread $thread)
     {
-        // *********until now we catch the spam at the database
-        // level but we don't have any front-end response for that.
-        // so lets try to implement the front-end
-        // **************************************************
+        // we will use the Gate facade directly
+        // and say if the gate denies a create event on a new reply
+         // then we are going to return a custom responce
+
+        if (Gate::denies('create', new Reply)) {
+            return response(
+                'You are posting too frequently. Please take a break. :)', 429
+            );
+        }
 
         try {
-            $this->validateReply();
+            $this->validate(request(), ['body' => 'required|spamfree']);
 
             $reply = $thread->addReply([
                 'body' => request('body'),
-                'user_id' => auth() -> id()
+                'user_id' => auth()->id()
             ]);
-        }   catch (\Exception $e) {
-                return response(
-                    'Sorry, your reply could not be saved at this time.', 422
-                );
+        } catch (\Exception $e) {
+            return response(
+                'Sorry, your reply could not be saved at this time.', 422
+            );
         }
 
-
-        // if (request()->expectsJson()) {
-        //     return $reply->load('owner');
-        // }
-
-        // **************Or we could just write***************
         return $reply->load('owner');
-        // ***************************************************
-
-        // return back()->with('flash', 'Your reply has been left.');
     }
 
     /**
@@ -77,13 +72,15 @@ class RepliesController extends Controller
         $this->authorize('update', $reply);
 
         try {
-            $this->validateReply();
+            $this->validate(request(), ['body' => 'required|spamfree']);
+
             $reply->update(request(['body']));
         } catch (\Exception $e) {
             return response(
-                'Sorry, your reply could not be saved at this time.',422
+                'Sorry, your reply could not be saved at this time.', 422
             );
         }
+
     }
 
     /**
@@ -103,15 +100,5 @@ class RepliesController extends Controller
         }
 
         return back();
-    }
-
-    protected function validateReply()
-    {
-        // ***** instead of adding to the __construct function
-        // the (Spam $spam) we can resolve the Spam class ****
-
-        $this->validate(request(), ['body'=> 'required']);
-        resolve(Spam::class)->detect(Request('body'));
-
     }
 }

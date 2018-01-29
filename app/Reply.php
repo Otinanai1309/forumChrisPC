@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Reply extends Model
@@ -63,6 +64,21 @@ class Reply extends Model
     public function thread()
     {
         return $this->belongsTo(Thread::class);
+    }
+
+    /**
+     * Determine if the reply was just published a moment ago.
+     *
+     * @return bool
+     */
+    public function wasJustPublished()
+    {
+        // Reply will be responsible to inform us
+        // if the reply was just published
+        // get your created at carbon instance
+        // and if that is greater than carbon now maybe a minute ago
+        // then you are posting too soon
+        return $this->created_at->gt(Carbon::now()->subMinute());
     }
 
     /**

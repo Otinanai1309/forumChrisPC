@@ -21,4 +21,23 @@ class ReplyPolicy
     {
         return $reply->user_id == $user->id;
     }
+
+    /**
+     * Determine if the authenticated user has permission to create a new reply.
+     *
+     * @param  User $user
+     * @return bool
+     */
+    public function create(User $user)
+    {
+        // if the user hasn't yet post a reply then
+        // return true (allow user to reply)
+        if (! $lastReply = $user->fresh()->lastReply) {
+            return true;
+        }
+
+        // but if the user wasJustPublished
+        // then you don't get the authorization 
+        return ! $lastReply->wasJustPublished();
+    }
 }

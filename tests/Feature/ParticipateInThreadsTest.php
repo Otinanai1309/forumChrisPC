@@ -109,8 +109,34 @@ class ParticipateInThreadsTest extends TestCase
             'body' => 'Yahoo Customer Support'
         ]);
 
-        $this->expectException(\Exception::class);
+//  ******* we no longer expect Exception so we delete this
+        // $this->expectException(\Exception::class);
+        // instead we assert staus(422) ********************
 
-        $this->post($thread->path() . '/replies', $reply->toArray());
+        $this->post($thread->path() . '/replies', $reply->toArray())
+            ->assertStatus(422);
+    }
+
+    function users_may_only_reply_a_maximun_of_once_per_minute()
+    {
+        // Given i am SighIn
+        $this->sighIn();
+        // and i have a thread
+        $thread = create('App\Thread');
+        // and try to make a new Reply
+        $reply = make('App\Reply', [
+            'body' => 'My simple reply.'
+        ]);
+
+        // when we hit the endpoint to publish
+        // the reply
+        $this->post($thread->path() . '/replies' . $reply->toArray())
+            ->assertStatus(200);
+        // up until if i run it its greeen
+        // but now lets try to write another Reply
+        // but now we should expect a 422
+        // ofcourse it fails.
+        $this->post($thread->path() . '/replies' . $reply->toArray())
+            ->assertStatus(422);
     }
 }
