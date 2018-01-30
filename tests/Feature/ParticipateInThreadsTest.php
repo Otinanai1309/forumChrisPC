@@ -102,6 +102,8 @@ class ParticipateInThreadsTest extends TestCase
     /** @test */
     function replies_that_contain_spam_may_not_be_created()
     {
+        $this->withExceptionHandling();
+
         $this->signIn();
 
         $thread = create('App\Thread');
@@ -109,34 +111,24 @@ class ParticipateInThreadsTest extends TestCase
             'body' => 'Yahoo Customer Support'
         ]);
 
-//  ******* we no longer expect Exception so we delete this
-        // $this->expectException(\Exception::class);
-        // instead we assert staus(422) ********************
-
-        $this->post($thread->path() . '/replies', $reply->toArray())
+        $this->json('post', $thread->path() . '/replies', $reply->toArray())
             ->assertStatus(422);
     }
 
-    function users_may_only_reply_a_maximun_of_once_per_minute()
+    /** @test */
+    function users_may_only_reply_a_maximum_of_once_per_minute()
     {
-        // Given i am SighIn
-        $this->sighIn();
-        // and i have a thread
-        $thread = create('App\Thread');
-        // and try to make a new Reply
-        $reply = make('App\Reply', [
-            'body' => 'My simple reply.'
-        ]);
+        $this->withExceptionHandling();
 
-        // when we hit the endpoint to publish
-        // the reply
-        $this->post($thread->path() . '/replies' . $reply->toArray())
+        $this->signIn();
+
+        $thread = create('App\Thread');
+        $reply = make('App\Reply');
+
+        $this->post($thread->path() . '/replies', $reply->toArray())
             ->assertStatus(200);
-        // up until if i run it its greeen
-        // but now lets try to write another Reply
-        // but now we should expect a 422
-        // ofcourse it fails.
-        $this->post($thread->path() . '/replies' . $reply->toArray())
-            ->assertStatus(422);
+
+        $this->post($thread->path() . '/replies', $reply->toArray())
+            ->assertStatus(429);
     }
 }

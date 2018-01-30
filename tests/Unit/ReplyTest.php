@@ -19,7 +19,7 @@ class ReplyTest extends TestCase
 
         // and since the reply was just created
         // i expect to be true that reply was just Published
-        this->assertTrue($reply->wasJustPublished());
+        $this->assertTrue($reply->wasJustPublished());
 
         $reply->created_at = Carbon::now()->subMonth();
         $this->assertFalse($reply->wasJustPublished());
