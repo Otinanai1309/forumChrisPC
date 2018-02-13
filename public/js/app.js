@@ -16689,10 +16689,10 @@ __webpack_require__(132);
 window.Vue = __webpack_require__(133);
 
 Vue.prototype.authorize = function (handler) {
-  // Additional admin privileges here.
-  var user = window.App.user;
+    // Additional admin privileges here.
+    var user = window.App.user;
 
-  return user ? handler(user) : false;
+    return user ? handler(user) : false;
 };
 
 /**
@@ -16704,16 +16704,16 @@ Vue.prototype.authorize = function (handler) {
 window.axios = __webpack_require__(136);
 
 window.axios.defaults.headers.common = {
-  'X-CSRF-TOKEN': window.App.csrfToken,
-  'X-Requested-With': 'XMLHttpRequest'
+    'X-CSRF-TOKEN': window.App.csrfToken,
+    'X-Requested-With': 'XMLHttpRequest'
 };
 
 window.events = new Vue();
 
 window.flash = function (message) {
-  var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'success';
+    var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'success';
 
-  window.events.$emit('flash', { message: message, level: level });
+    window.events.$emit('flash', { message: message, level: level });
 };
 
 /***/ }),
