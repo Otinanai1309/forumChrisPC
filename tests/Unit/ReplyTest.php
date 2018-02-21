@@ -27,4 +27,13 @@ class ReplyTest extends TestCase
         //  So i go to Reply model and create the method.
 
     }
+
+    function it_can_detect_all_mentioned_users_in_the_body()
+    {
+        $reply = create('App\Reply', [
+            'body' => '@JaneDoe wants to talk to @JohnDoe'
+        ]);
+
+        $this->assertEquals(['JaneDoe', 'JohnDoe'], $reply->mentionedUsers());
+    }
 }
