@@ -24,6 +24,9 @@
 </template>
 
 <script>
+    import 'jquery.caret';
+    import 'at.js';
+
     export default {
         data() {
             return {
@@ -37,16 +40,24 @@
             }
         },
 
+        mounted() {
+            $('#body').atwho({
+                at: "@",
+                delay: 750,
+                callbacks: {
+                    remoteFilter: function(query, callback) {
+                        $.getJSON("/api/users", {name: query}, function(usernames) {
+                            callback(usernames)
+                        });
+                    }
+                }
+            });
+        },
+
         methods: {
             addReply() {
                 axios.post(location.pathname + '/replies', { body: this.body })
                     .catch(error => {
-                        // ***with the console log we see if it works the way we expect
-                        // and after that we delete them
-                        // console.log('ERROR');
-                        // console.log(error.response);
-                        // the danger parameter exists because we want to change
-                        // the appearence of the flash message
                         flash(error.response.data, 'danger');
                     })
                     .then(({data}) => {
