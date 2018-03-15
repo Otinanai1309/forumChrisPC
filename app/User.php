@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'avatar_path'
     ];
 
     /**
@@ -55,10 +55,6 @@ class User extends Authenticatable
      */
     public function lastReply()
     {
-        //  yes a user has many replies but
-        //  if if you ever wanna fetch a specific one
-        // we can use a hasOne relationship instead
-        //  and latest for reverse order.
         return $this->hasOne(Reply::class)->latest();
     }
 
@@ -83,6 +79,21 @@ class User extends Authenticatable
             $this->visitedThreadCacheKey($thread),
             Carbon::now()
         );
+    }
+
+    public function avatar()
+    {
+        return $this->avatar_path ?: 'avatars/default.png';
+    }
+    /**
+     * Get the path to the user's avatar.
+     *
+     * @param  string $avatar
+     * @return string
+     */
+    public function getAvatarPathAttribute($avatar)
+    {
+        return ($avatar ?: 'images/avatars/default.png');
     }
 
     /**
